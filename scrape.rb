@@ -4,6 +4,7 @@ require 'fileutils'
 require 'json'
 require 'nokogiri'
 require 'open-uri'
+# require 'rubyzip'
 
 class Article
   attr_accessor :title
@@ -12,6 +13,8 @@ class Article
   attr_accessor :pdf_url
   attr_accessor :code_url
 end
+
+OUTPUT_RELATIVE = "../"
 
 if !File.exist?('papers.html')
   open('papers.html', 'wb') do |file|
@@ -48,3 +51,23 @@ page.css( "h3" ).each { |tag|
 File.open("articles.json", 'w') { |file|
 	file.write( articles.to_json )
 }
+
+articles.each { |a|
+  outfolder = OUTPUT_RELATIVE + a[:folder]
+  Dir.mkdir outfolder if ! Dir.exists? outfolder
+  File.open( outfolder + "/readme.md", 'w') { |file|
+    filetext = []
+    filetext <<  "# " + a[:title]
+    filetext << " "
+    filetext << "*by Doug Hennig*"
+    filetext << " "
+    filetext << a[:description]
+    filetext << " "
+    filetext << "----"
+    filetext << " "
+    filetext << File.read("bio.md")
+    file.write( filetext.join( "\n" ) )
+  }
+}
+
+
